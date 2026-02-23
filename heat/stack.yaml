@@ -1,0 +1,463 @@
+---
+heat_template_version: wallaby
+
+description: >-
+  Cleura Cloud Launch Pad: Creates a network, router, IPv4 and IPv6
+  subnets, a security group, and a bastion host running your preferred
+  base OS.
+
+parameters:
+  ssh_public_key:
+    type: string
+    description: "Public Secure Shell (SSH) key"
+  public_net:
+    type: string
+    description: "Name of the external network providing an internet connection"
+    default: ext-net
+  enable_ipv6:
+    type: boolean
+    description: "Enable IPv6 support for the virtual network"
+    default: true
+  ipv4_subnet_cidr:
+    type: string
+    description: "Private IPv4 network mask, in CIDR notation"
+    default: "192.168.101.0/24"
+    constraints:
+      - custom_constraint: net_cidr
+  ipv4_allow_access:
+    type: string
+    description: "Allowed source IPv4 address or network for management access"
+    default: "0.0.0.0/0"
+    constraints:
+      - custom_constraint: ip_or_cidr
+  ipv6_subnetpool:
+    type: string
+    description: "IPv6 subnet pool"
+    default: ipv6_tenant_pool
+    constraints:
+      - custom_constraint: neutron.subnetpool
+  ipv6_mode:
+    type: string
+    description: >
+      "IPv6 address assignment and router advertisement mode"
+    default: slaac
+    constraints:
+      - allowed_values:
+          - slaac
+          - dhcpv6-stateful
+          - dhcpv6-stateless
+  ipv6_allow_access:
+    type: string
+    description: "Allowed source IPv6 address or network for management access"
+    default: "::/0"
+    constraints:
+      - custom_constraint: ip_or_cidr
+  image:
+    type: string
+    description: "Base image to use for the bastion host"
+    default: "Ubuntu 24.04 Noble Numbat x86_64"
+    constraints:
+      - custom_constraint: glance.image
+      - allowed_values:
+          - "Ubuntu 24.04 Noble Numbat x86_64"
+          - "Debian 12 Bookworm x86_64"
+          - "Rocky Linux 10 x86_64"
+  volume_size:
+    type: number
+    description: "Storage space allocated to the bastion host (GiB)"
+    default: 10
+    constraints:
+      - range:
+          min: 10
+          max: 100
+  flavor:
+    type: string
+    description: "Flavor to use for the bastion host"
+    default: "b.2c2gb"
+    constraints:
+      - custom_constraint: nova.flavor
+
+conditions:
+  enable_ipv6: { get_param: enable_ipv6 }
+
+resources:
+
+# WaitCondition to report successful bastion host launch and
+# configuration.
+#
+# The stack should always come up within 5 minutes.
+  all_done:
+    type: OS::Heat::WaitCondition
+    properties:
+      handle: { get_resource: all_done_handle }
+      count: 1
+      timeout: 300
+
+  all_done_handle:
+    type: OS::Heat::WaitConditionHandle
+
+# Since this is meant for an initial launch of resources in
+# Cleura Cloud, don't expect there to be a keypair yet.
+#
+# Instead, create one based on the supplied public key.
+  key_pair:
+    type: "OS::Nova::KeyPair"
+    properties:
+      name:
+        list_join:
+          - "-"
+          - [{ get_param: "OS::stack_name" }, "keypair"]
+      public_key: { get_param: ssh_public_key }
+
+# Always create just one Neutron network, which is an entity that's
+# independent of the IP version we use. Protocol-specific settings
+# happen at the subnet level, on level below networks.
+  network:
+    type: "OS::Neutron::Net"
+    properties:
+      name:
+        list_join:
+          - "-"
+          - [{ get_param: "OS::stack_name" }, "network"]
+
+  subnet_ipv6:
+    type: "OS::Neutron::Subnet"
+    condition: enable_ipv6
+    properties:
+      name:
+        list_join:
+          - "-"
+          - [{ get_param: "OS::stack_name" }, "subnet", "ipv6"]
+      ip_version: 6
+      ipv6_address_mode: { get_param: ipv6_mode }
+      ipv6_ra_mode: { get_param: ipv6_mode }
+      subnetpool: { get_param: ipv6_subnetpool }
+      network: { get_resource: network }
+      enable_dhcp: true
+
+  subnet_ipv4:
+    type: "OS::Neutron::Subnet"
+    properties:
+      name:
+        list_join:
+          - "-"
+          - [{ get_param: "OS::stack_name" }, "subnet", "ipv4"]
+      ip_version: 4
+      network: { get_resource: network }
+      cidr: { get_param: ipv4_subnet_cidr }
+      enable_dhcp: true
+
+# Define a single security group. However, based on the ipv6 and ipv4
+# conditions, all rules that created in that security group are
+# IP protocol-specific.
+  security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        list_join:
+          - "-"
+          - [{ get_param: "OS::stack_name" }, "securitygroup"]
+      description: "Neutron security group"
+
+# Always allow access from other ports in the same security group.
+  security_group_rule_self_ipv6:
+    type: OS::Neutron::SecurityGroupRule
+    condition: enable_ipv6
+    properties:
+      security_group: { get_resource: security_group }
+      remote_group: { get_resource: security_group }
+      ethertype: IPv6
+      direction: ingress
+
+  security_group_rule_self_ipv4:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: security_group }
+      remote_group: { get_resource: security_group }
+      ethertype: IPv4
+      direction: ingress
+
+# Always allow ICMP, from anywhere.
+  security_group_rule_icmp_ipv6:
+    type: OS::Neutron::SecurityGroupRule
+    condition: enable_ipv6
+    properties:
+      security_group: { get_resource: security_group }
+      remote_ip_prefix: "::/0"
+      ethertype: IPv6
+      protocol: icmp
+      direction: ingress
+
+  security_group_rule_icmp_ipv4:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: security_group }
+      remote_ip_prefix: "0.0.0.0/0"
+      ethertype: IPv4
+      protocol: icmp
+      direction: ingress
+
+# Allow SSH from anywhere by default, but allow the user to restrict
+# access via the ipv*_allow_access parameters.
+  security_group_rule_ssh_ipv6:
+    type: OS::Neutron::SecurityGroupRule
+    condition: enable_ipv6
+    properties:
+      security_group: { get_resource: security_group }
+      remote_ip_prefix: { get_param: ipv6_allow_access }
+      ethertype: IPv6
+      protocol: tcp
+      port_range_min: 22
+      port_range_max: 22
+      direction: ingress
+
+  security_group_rule_ssh_ipv4:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: security_group }
+      remote_ip_prefix: { get_param: ipv4_allow_access }
+      ethertype: IPv4
+      protocol: tcp
+      port_range_min: 22
+      port_range_max: 22
+      direction: ingress
+
+# Ensure that the host runs a full upgrade on first boot.
+  package_config:
+    type: "OS::Heat::CloudConfig"
+    properties:
+      cloud_config:
+        merge_how: 'dict(recurse_array,no_replace)+list(append)'
+        package_update: true
+        package_upgrade: true
+
+# Based on the image, the default username differs. By defining a user
+# "cleura" with user redirect, the user can always find the correct
+# default username for the bastion host OS.
+  user_config:
+    type: "OS::Heat::CloudConfig"
+    properties:
+      cloud_config:
+        merge_how: 'dict(recurse_array,no_replace)+list(append)'
+        users:
+          - default
+          - name: cleura
+            ssh_redirect_user: true
+
+# If the package upgrade requires a reboot, do it. cloud-init does
+# this immediately after the package upgrade and then resumes
+# initalisation after the reboot.
+  reboot_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        merge_how: 'dict(recurse_array,no_replace)+list(append)'
+        package_reboot_if_required: true
+
+# Invoke the WaitConditionHandle at the end of the cloud-init run
+# (meaning, possibly after a reboot).
+  all_done_config:
+    type: "OS::Heat::CloudConfig"
+    properties:
+      cloud_config:
+        merge_how: 'dict(recurse_array,no_replace)+list(append)'
+        runcmd:
+          - str_replace:
+              template: "curl --retry 7"
+              params:
+                'curl': { get_attr: ['all_done_handle', 'curl_cli'] }
+
+# Aggregated multipart config for the bastion host
+  bastion_config:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: user_config}
+        - config: {get_resource: package_config}
+        - config: {get_resource: reboot_config}
+        - config: {get_resource: all_done_config}
+
+
+  bastion_host_port:
+    type: OS::Neutron::Port
+    properties:
+      name:
+        list_join:
+          - "-"
+          - [{ get_param: "OS::stack_name" }, "bastion", "port"]
+      network: { get_resource: network }
+      security_groups:
+        - { get_resource: security_group }
+
+  bastion_host:
+    type: OS::Nova::Server
+    properties:
+      name:
+        list_join:
+          - "-"
+          - [{ get_param: "OS::stack_name" }, "bastion"]
+      block_device_mapping_v2:
+        - image: { get_param: image }
+          volume_size: { get_param: volume_size }
+          delete_on_termination: true
+      flavor: { get_param: flavor }
+      user_data: { get_resource: bastion_config }
+      user_data_format: RAW
+      user_data_update_policy: IGNORE
+      config_drive: true
+      key_name: { get_resource: key_pair }
+      networks:
+        - port: { get_resource: bastion_host_port }
+
+
+# We always create just one router, which uses the public_net as its
+# external gateway. Neutron is smart enough to figure out that it
+# needs to route via an IPv4 or IPv6 subnet associated with the
+# external network, based on the router interface associations that
+# belong to IPv4 or IPv6 private networks.
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: public_net }
+
+  router_interface_ipv6:
+    type: OS::Neutron::RouterInterface
+    condition: enable_ipv6
+    properties:
+      router: { get_resource: router }
+      subnet: { get_resource: subnet_ipv6 }
+
+  router_interface_ipv4:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: router }
+      subnet: { get_resource: subnet_ipv4 }
+
+# We don't delete the floating IP address when the stack is deleted.
+# This is to make it easy to reuse the floating IP within the same
+# project.
+  floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net }
+    depends_on:
+      - router_interface_ipv4
+    deletion_policy: retain
+
+  floating_ip_association:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: floating_ip }
+      port_id: { get_resource: bastion_host_port }
+
+
+outputs:
+
+# Individual outputs, to be fetched separately as needed
+  public_ipv4:
+    description: Bastion host's public IPv4 address
+    value:
+      get_attr:
+        - floating_ip
+        - floating_ip_address
+  allowed_networks_ipv4:
+    description: IPv4 networks allowed to connect to the bastion host
+    value:
+      get_attr:
+        - security_group_rule_ssh_ipv4
+        - show
+        - remote_ip_prefix
+  public_ipv6:
+    condition: enable_ipv6
+    description: Bastion host's public IPv6 address
+    value:
+      get_attr:
+        - bastion_host_port
+        - fixed_ips
+        - 1
+        - ip_address
+  allowed_networks_ipv6:
+    condition: enable_ipv6
+    description: IPv6 networks allowed to connect to the bastion host
+    value:
+      get_attr:
+        - security_group_rule_ssh_ipv6
+        - show
+        - remote_ip_prefix
+  network:
+    description: Neutron Network
+    value: { get_resource: network }
+  security_group:
+    description: Security Group
+    value: { get_resource: security_group }
+
+# Summary description. To be retrieved with:
+# openstack stack output show -f value -c output_value <stack name> details
+  details:
+    description: "Full stack details"
+    value:
+      str_replace:
+        template: |-
+          ========== CLEURA CLOUD LAUNCH PAD ==========
+                            .-
+                      =@@@@@@@
+                   =@@@@@@@@@@       +@@@@*.
+                .#@@@@@@@@@@@@       +@@@@@@@@@@
+                @@@@@@@@@@@@@@       *@@@@@@@@@@
+              :@@@@@@@@@@@@@%+.      *@@@@@@@@@@
+             .@@@@@@@@@@@            *@@@@@@@@@@
+             @@@@@@@@@@              #@@@@@@@@@@
+            -@@@@@@@@@                   .:%@@@@
+            @@@@@@@@@+
+            @@@@@@@@@:
+            @@@@@@@@@#
+            :@@@@@@@@@                .@@@-.
+             @@@@@@@@@@:             .@@@@@@@@@@
+             .@@@@@@@@@@@-.       .-@@@@@@@@@@@.
+              .@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                 .@@@@@@@@@@@@@@@@@@@@@@@@@.
+                   .@@@@@@@@@@@@@@@@@@@@@.
+                       #@@@@@@@@@@@@@%
+                               .
+
+          Stack name: stack_name
+          Stack UUID: stack_uuid
+
+          Bastion host server UUID: server_uuid
+
+          Bastion host IPv4 address: server_ipv4
+          Allows SSH from: server_ipv4_ssh
+
+          Bastion host IPv6 address: server_ipv6
+          Allows SSH from: server_ipv6_ssh
+
+          Network UUID: network_uuid
+          Security group UUID: securitygroup_uuid
+
+          To find out how to connect to your host, run this command:
+
+          openstack server ssh server_uuid -- -l cleura
+        params:
+          stack_name: { get_param: "OS::stack_name" }
+          stack_uuid: { get_param: "OS::stack_id" }
+          server_uuid: { get_resource: bastion_host }
+          server_ipv4: { get_attr: [ floating_ip, floating_ip_address ] }
+          server_ipv4_ssh:
+            get_attr:
+              - security_group_rule_ssh_ipv4
+              - show
+              - remote_ip_prefix
+          server_ipv6:
+            if:
+              - enable_ipv6
+              - { get_attr: [ bastion_host_port, fixed_ips, 1, ip_address ] }
+              - "None"
+          server_ipv6_ssh:
+            if:
+              - enable_ipv6
+              - { get_attr: [ security_group_rule_ssh_ipv6, show, remote_ip_prefix ] }
+              - "None"
+          network_uuid: { get_resource: network }
+          securitygroup_uuid: { get_resource: security_group }
