@@ -1,0 +1,20 @@
+---
+default:
+  image: 'python:3.13'
+  before_script:
+    - pip install tox
+
+stages:
+  - build
+  - test
+
+lint:
+  stage: build
+  script:
+    - tox -e gitlint
+    - tox -e yamllint,markdownlint
+
+test:
+  stage: test
+  script:
+    - tox
