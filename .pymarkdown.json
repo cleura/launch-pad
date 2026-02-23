@@ -1,0 +1,33 @@
+{
+    "extensions": {
+        "front-matter": {
+            "enabled": true
+        }
+    },
+    "plugins" : {
+        "blanks-around-fences": {
+            "enabled": false
+        },
+        "code-block-style": {
+            "enabled": false
+        },
+        "line-length": {
+            "enabled": true,
+            "line_length": 600,
+            "heading_line_length": 80,
+            "code_blocks": false
+        },
+        "no-multiple-blanks": {
+            "maximum": 2
+        },
+        "no-duplicate-heading": {
+            "enabled": false
+        },
+        "blanks-around-headings": {
+            "enabled": false
+        },
+        "ul-indent": {
+            "enabled": false
+        }
+    }
+}
