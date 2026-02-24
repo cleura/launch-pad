@@ -1,0 +1,20 @@
+---
+- name: "Launch Cleura Cloud resources"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    teardown: false
+
+  tasks:
+    - name: "Manage key pair"
+      ansible.builtin.import_tasks: "keypair.yaml"
+    - name: "Manage network resources"
+      ansible.builtin.import_tasks: "network.yaml"
+    - name: "Manage security groups"
+      ansible.builtin.import_tasks: "secgroups.yaml"
+    - name: "Manage the bastion host"
+      ansible.builtin.import_tasks: "bastion-host.yaml"
+    - name: "Show summary"
+      ansible.builtin.import_tasks: "summary.yaml"

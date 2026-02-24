@@ -1,0 +1,16 @@
+---
+- name: Create public key
+  openstack.cloud.keypair:
+    name: "{{ stack_name }}-keypair"
+    public_key: "{{ ssh_public_key }}"
+    state: present
+  register: "_keypair"
+  when: "not(teardown | bool)"
+
+- name: Delete public key
+  openstack.cloud.keypair:
+    name: "{{ stack_name }}-keypair"
+    public_key: "{{ ssh_public_key }}"
+    state: absent
+  when:
+    - "teardown | bool"

@@ -1,0 +1,71 @@
+---
+- name: "Create networking resources"
+  when: "not(teardown | bool)"
+  block:
+
+    - name: "Create network"
+      openstack.cloud.network:
+        state: present
+        name: "{{ stack_name }}-network"
+      register: "_network"
+
+    - name: "Create IPv4 subnet"
+      openstack.cloud.subnet:
+        state: present
+        network: "{{ _network.id }}"
+        name: "{{ stack_name }}-subnet-ipv4"
+        ip_version: 4
+        cidr: "{{ ipv4_subnet_cidr }}"
+      register: "_subnet_ipv4"
+
+    - name: "Create IPv6 subnet"
+      openstack.cloud.subnet:
+        state: present
+        network: "{{ _network.id }}"
+        name: "{{ stack_name }}-subnet-ipv6"
+        ip_version: 6
+        ipv6_address_mode: "{{ ipv6_mode }}"
+        ipv6_ra_mode: "{{ ipv6_mode }}"
+        subnet_pool: "{{ ipv6_subnetpool }}"
+      register: "_subnet_ipv6"
+      when: "enable_ipv6 | bool"
+
+    - name: "Create router"
+      openstack.cloud.router:
+        state: present
+        name: "{{ stack_name }}-router"
+        network: "{{ public_net }}"
+        interfaces:
+          - "{{ _subnet_ipv4.id }}"
+          - "{{ _subnet_ipv6.id | default(omit) }}"
+
+- name: "Remove networking resources"
+  when: "teardown | bool"
+  block:
+
+    - name: "Delete router"
+      openstack.cloud.router:
+        state: absent
+        name: "{{ stack_name }}-router"
+        network: "{{ public_net }}"
+
+    - name: "Delete IPv6 subnet"
+      openstack.cloud.subnet:
+        state: absent
+        name: "{{ stack_name }}-subnet-ipv6"
+        ip_version: 6
+        ipv6_address_mode: "{{ ipv6_mode }}"
+        ipv6_ra_mode: "{{ ipv6_mode }}"
+        subnet_pool: "{{ ipv6_subnetpool }}"
+      when: "enable_ipv6 | bool"
+
+    - name: "Delete IPv4 subnet"
+      openstack.cloud.subnet:
+        state: absent
+        name: "{{ stack_name }}-subnet-ipv4"
+        ip_version: 4
+
+    - name: "Delete network"
+      openstack.cloud.network:
+        state: absent
+        name: "{{ stack_name }}-network"

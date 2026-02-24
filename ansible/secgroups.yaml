@@ -1,0 +1,73 @@
+---
+- name: "Create security group and rules"
+  when: "not(teardown | bool)"
+  block:
+
+    - name: "Create security group"
+      openstack.cloud.security_group:
+        state: present
+        name: "{{ stack_name }}-security_group"
+      register: "_security_group"
+
+    - name: "Create security group rule for internal connections (IPv4)"
+      openstack.cloud.security_group_rule:
+        state: present
+        security_group: "{{ _security_group.security_group.id }}"
+        ether_type: "IPv4"
+        remote_group: "{{ _security_group.security_group.id }}"
+
+    - name: "Create ICMP security group rule (IPv4)"
+      openstack.cloud.security_group_rule:
+        state: present
+        security_group: "{{ _security_group.security_group.id }}"
+        ether_type: "IPv4"
+        protocol: icmp
+        remote_ip_prefix: "0.0.0.0/0"
+
+    - name: "Create SSH security group rule (IPv4)"
+      openstack.cloud.security_group_rule:
+        state: present
+        security_group: "{{ _security_group.security_group.id }}"
+        ether_type: "IPv4"
+        protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+        remote_ip_prefix: "{{ ipv4_allow_access }}"
+      register: "_security_group_rule_ssh_ipv4"
+
+    - name: "Create security group rule for internal connections (IPv6)"
+      openstack.cloud.security_group_rule:
+        state: present
+        security_group: "{{ _security_group.security_group.id }}"
+        ether_type: "IPv6"
+        remote_group: "{{ _security_group.security_group.id }}"
+      when: "enable_ipv6 | bool"
+
+    - name: "Create ICMP security group rule (IPv6)"
+      openstack.cloud.security_group_rule:
+        state: present
+        security_group: "{{ _security_group.security_group.id }}"
+        ether_type: "IPv6"
+        protocol: ipv6-icmp
+        remote_ip_prefix: "::/0"
+      when: "enable_ipv6 | bool"
+
+    - name: "Create SSH security group rule (IPv6)"
+      openstack.cloud.security_group_rule:
+        state: present
+        security_group: "{{ _security_group.security_group.id }}"
+        ether_type: "IPv6"
+        protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+        remote_ip_prefix: "{{ ipv6_allow_access }}"
+      register: "_security_group_rule_ssh_ipv6"
+      when: "enable_ipv6 | bool"
+
+- name: "Remove security group and rules"
+  when: "teardown | bool"
+  block:
+    - name: "Delete security group"
+      openstack.cloud.security_group:
+        state: absent
+        name: "{{ stack_name }}-security_group"

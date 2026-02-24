@@ -9,11 +9,16 @@ rules:
   brackets:
     max-spaces-inside: 1
     min-spaces-inside: 0
+  comments:
+    min-spaces-from-content: 1
   comments-indentation: disable
   document-start:
     level: error
   line-length:
     allow-non-breakable-words: true
-    max: 90
+    max: 120
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
   truthy:
     level: error

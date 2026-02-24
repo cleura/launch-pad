@@ -1,0 +1,50 @@
+---
+- name: "Show summary"
+  when: "not(teardown | bool)"
+  block:
+    - name: "Set summary"
+      ansible.builtin.set_fact:
+        "_summary": |
+          ========== CLEURA CLOUD LAUNCH PAD ==========
+                            .-
+                      =@@@@@@@
+                   =@@@@@@@@@@       +@@@@*.
+                .#@@@@@@@@@@@@       +@@@@@@@@@@
+                @@@@@@@@@@@@@@       *@@@@@@@@@@
+              :@@@@@@@@@@@@@%+.      *@@@@@@@@@@
+             .@@@@@@@@@@@            *@@@@@@@@@@
+             @@@@@@@@@@              #@@@@@@@@@@
+            -@@@@@@@@@                   .:%@@@@
+            @@@@@@@@@+
+            @@@@@@@@@:
+            @@@@@@@@@#
+            :@@@@@@@@@                .@@@-.
+             @@@@@@@@@@:             .@@@@@@@@@@
+             .@@@@@@@@@@@-.       .-@@@@@@@@@@@.
+              .@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                 .@@@@@@@@@@@@@@@@@@@@@@@@@.
+                   .@@@@@@@@@@@@@@@@@@@@@.
+                       #@@@@@@@@@@@@@%
+                               .
+
+          Stack name: {{ stack_name }}
+
+          Bastion host server UUID: {{ _bastion_host.server.id }}
+
+          Bastion host IPv4 address: {{ _bastion_floating_ip.floating_ip.floating_ip_address }}
+          Allows SSH from: {{ _security_group_rule_ssh_ipv4.rule.remote_ip_prefix }}
+
+          {% if enable_ipv6 | bool %}Bastion host IPv6 address: {{ _bastion_port.port.fixed_ips[1].ip_address }}
+          Allows SSH from: {{ _security_group_rule_ssh_ipv6.rule.remote_ip_prefix }}{% endif %}
+
+          Network UUID: {{ _network.network.id }}
+          Security group UUID: {{ _security_group.security_group.id }}
+
+          To find out how to connect to your host, run this command:
+
+          openstack server ssh {{ _bastion_host.server.id }} -- -l cleura
+
+    - name: "Show summary"
+      ansible.builtin.debug:
+        msg: "{{ _summary.split('\n') }}"

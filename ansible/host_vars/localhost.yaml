@@ -1,0 +1,11 @@
+---
+enable_ipv6: true
+flavor: 'b.2c2gb'
+image: 'Ubuntu 24.04 Noble Numbat x86_64'
+ipv4_allow_access: '0.0.0.0/0'
+ipv4_subnet_cidr: '192.168.101.0/24'
+ipv6_allow_access: '::/0'
+ipv6_mode: 'slaac'
+ipv6_subnetpool: 'ipv6_tenant_pool'
+public_net: 'ext-net'
+volume_size: 10
