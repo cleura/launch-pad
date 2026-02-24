@@ -1,0 +1,9 @@
+#cloud-config
+---
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+users:
+  - default
+  - name: cleura
+    ssh_redirect_user: true
