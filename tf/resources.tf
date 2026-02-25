@@ -88,6 +88,7 @@ resource "openstack_networking_port_v2" "ramp_port" {
   network_id = openstack_networking_network_v2.network.id
   admin_state_up = "true"
   security_group_ids = [openstack_networking_secgroup_v2.security_group.id]
+  depends_on  = [openstack_networking_router_interface_v2.router_interface_ipv4]
 }
 
 resource "openstack_compute_instance_v2" "ramp" {
