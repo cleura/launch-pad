@@ -19,7 +19,7 @@ resource "openstack_networking_subnet_v2" "subnet_ipv6" {
   name = "${var.stack_name}-subnet-ipv6"
   network_id = openstack_networking_network_v2.network.id
   ip_version = 6
-  subnetpool_id = data.openstack_networking_subnetpool_v2.subnetpool.id
+  subnetpool_id = data.openstack_networking_subnetpool_v2.subnetpool[0].id
   ipv6_address_mode = var.ipv6_mode
   ipv6_ra_mode = var.ipv6_mode
 }
