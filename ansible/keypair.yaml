@@ -1,7 +1,7 @@
 ---
 - name: Create public key
   openstack.cloud.keypair:
-    name: "{{ stack_name }}-keypair"
+    name: "{{ pad_name }}-keypair"
     public_key: "{{ ssh_public_key }}"
     state: present
   register: "_keypair"
@@ -9,7 +9,7 @@
 
 - name: Delete public key
   openstack.cloud.keypair:
-    name: "{{ stack_name }}-keypair"
+    name: "{{ pad_name }}-keypair"
     public_key: "{{ ssh_public_key }}"
     state: absent
   when:

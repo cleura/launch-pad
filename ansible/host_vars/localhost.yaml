@@ -1,4 +1,5 @@
 ---
+pad_name: cleura-cloud-launch-pad
 enable_ipv6: true
 flavor: 'b.2c2gb'
 image: 'Ubuntu 24.04 Noble Numbat x86_64'

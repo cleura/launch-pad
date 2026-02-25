@@ -1,14 +1,14 @@
 resource "openstack_compute_keypair_v2" "keypair" {
-  name = "${var.stack_name}-keypair"
+  name = "${var.pad_name}-keypair"
   public_key = var.ssh_public_key
 }
 
 resource "openstack_networking_network_v2" "network" {
-  name = "${var.stack_name}-network"
+  name = "${var.pad_name}-network"
 }
 
 resource "openstack_networking_subnet_v2" "subnet_ipv4" {
-  name = "${var.stack_name}-subnet-ipv4"
+  name = "${var.pad_name}-subnet-ipv4"
   network_id = openstack_networking_network_v2.network.id
   ip_version = 4
   cidr = var.ipv4_subnet_cidr
@@ -16,7 +16,7 @@ resource "openstack_networking_subnet_v2" "subnet_ipv4" {
 
 resource "openstack_networking_subnet_v2" "subnet_ipv6" {
   count = var.enable_ipv6 ? 1 : 0
-  name = "${var.stack_name}-subnet-ipv6"
+  name = "${var.pad_name}-subnet-ipv6"
   network_id = openstack_networking_network_v2.network.id
   ip_version = 6
   subnetpool_id = data.openstack_networking_subnetpool_v2.subnetpool[0].id
@@ -25,7 +25,7 @@ resource "openstack_networking_subnet_v2" "subnet_ipv6" {
 }
 
 resource "openstack_networking_router_v2" "router" {
-  name = "${var.stack_name}-router"
+  name = "${var.pad_name}-router"
   external_network_id = data.openstack_networking_network_v2.external_network.id
 }
 
@@ -42,7 +42,7 @@ resource "openstack_networking_router_interface_v2" "router_interface_ipv6" {
 }
 
 resource "openstack_networking_secgroup_v2" "security_group" {
-  name = "${var.stack_name}-securitygroup"
+  name = "${var.pad_name}-securitygroup"
 }
 
 resource "openstack_networking_secgroup_rule_v2" "security_group_rule_icmp_ipv4" {
@@ -84,14 +84,14 @@ resource "openstack_networking_secgroup_rule_v2" "security_group_rule_ssh_ipv6" 
 }
 
 resource "openstack_networking_port_v2" "bastion_host_port" {
-  name = "${var.stack_name}-bastion-port"
+  name = "${var.pad_name}-bastion-port"
   network_id = openstack_networking_network_v2.network.id
   admin_state_up = "true"
   security_group_ids = [openstack_networking_secgroup_v2.security_group.id]
 }
 
 resource "openstack_compute_instance_v2" "bastion_host" {
-  name = "${var.stack_name}-bastion-host"
+  name = "${var.pad_name}-bastion-host"
   flavor_name = var.flavor
   config_drive = true
 

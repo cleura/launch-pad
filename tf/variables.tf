@@ -1,6 +1,7 @@
-variable "stack_name" {
+variable "pad_name" {
   type = string
-  description = "Name assigned to the stack"
+  description = "Name assigned to the pad"
+  default = "cleura-cloud-launch-pad"
 }
 variable "ssh_public_key" {
   type = string

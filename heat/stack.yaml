@@ -422,7 +422,7 @@ outputs:
                        #@@@@@@@@@@@@@%
                                .
 
-          Stack name: stack_name
+          Pad name: pad_name
           Stack UUID: stack_uuid
 
           Bastion host server UUID: server_uuid
@@ -440,7 +440,7 @@ outputs:
 
           openstack server ssh server_uuid -- -l cleura
         params:
-          stack_name: { get_param: "OS::stack_name" }
+          pad_name: { get_param: "OS::stack_name" }
           stack_uuid: { get_param: "OS::stack_id" }
           server_uuid: { get_resource: bastion_host }
           server_ipv4: { get_attr: [ floating_ip, floating_ip_address ] }

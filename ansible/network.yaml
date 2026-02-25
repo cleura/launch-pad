@@ -6,14 +6,14 @@
     - name: "Create network"
       openstack.cloud.network:
         state: present
-        name: "{{ stack_name }}-network"
+        name: "{{ pad_name }}-network"
       register: "_network"
 
     - name: "Create IPv4 subnet"
       openstack.cloud.subnet:
         state: present
         network: "{{ _network.id }}"
-        name: "{{ stack_name }}-subnet-ipv4"
+        name: "{{ pad_name }}-subnet-ipv4"
         ip_version: 4
         cidr: "{{ ipv4_subnet_cidr }}"
       register: "_subnet_ipv4"
@@ -22,7 +22,7 @@
       openstack.cloud.subnet:
         state: present
         network: "{{ _network.id }}"
-        name: "{{ stack_name }}-subnet-ipv6"
+        name: "{{ pad_name }}-subnet-ipv6"
         ip_version: 6
         ipv6_address_mode: "{{ ipv6_mode }}"
         ipv6_ra_mode: "{{ ipv6_mode }}"
@@ -33,7 +33,7 @@
     - name: "Create router"
       openstack.cloud.router:
         state: present
-        name: "{{ stack_name }}-router"
+        name: "{{ pad_name }}-router"
         network: "{{ public_net }}"
         interfaces:
           - "{{ _subnet_ipv4.id }}"
@@ -46,13 +46,13 @@
     - name: "Delete router"
       openstack.cloud.router:
         state: absent
-        name: "{{ stack_name }}-router"
+        name: "{{ pad_name }}-router"
         network: "{{ public_net }}"
 
     - name: "Delete IPv6 subnet"
       openstack.cloud.subnet:
         state: absent
-        name: "{{ stack_name }}-subnet-ipv6"
+        name: "{{ pad_name }}-subnet-ipv6"
         ip_version: 6
         ipv6_address_mode: "{{ ipv6_mode }}"
         ipv6_ra_mode: "{{ ipv6_mode }}"
@@ -62,10 +62,10 @@
     - name: "Delete IPv4 subnet"
       openstack.cloud.subnet:
         state: absent
-        name: "{{ stack_name }}-subnet-ipv4"
+        name: "{{ pad_name }}-subnet-ipv4"
         ip_version: 4
 
     - name: "Delete network"
       openstack.cloud.network:
         state: absent
-        name: "{{ stack_name }}-network"
+        name: "{{ pad_name }}-network"

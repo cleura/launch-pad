@@ -6,7 +6,7 @@
     - name: "Create port"
       openstack.cloud.port:
         state: present
-        name: "{{ stack_name }}-bastion-port"
+        name: "{{ pad_name }}-bastion-port"
         network: "{{ _network.network.id }}"
         security_groups:
           - "{{ _security_group.security_group.id }}"
@@ -15,7 +15,7 @@
     - name: "Create server"
       openstack.cloud.server:
         state: present
-        name: "{{ stack_name }}-bastion"
+        name: "{{ pad_name }}-bastion"
         boot_from_volume: true
         config_drive: true
         flavor: "{{ flavor }}"
@@ -49,9 +49,9 @@
     - name: "Delete server"
       openstack.cloud.server:
         state: absent
-        name: "{{ stack_name }}-bastion"
+        name: "{{ pad_name }}-bastion"
 
     - name: "Delete port"
       openstack.cloud.port:
         state: absent
-        name: "{{ stack_name }}-bastion-port"
+        name: "{{ pad_name }}-bastion-port"

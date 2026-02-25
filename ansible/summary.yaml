@@ -28,7 +28,7 @@
                        #@@@@@@@@@@@@@%
                                .
 
-          Stack name: {{ stack_name }}
+          Pad name: {{ pad_name }}
 
           Bastion host server UUID: {{ _bastion_host.server.id }}
 

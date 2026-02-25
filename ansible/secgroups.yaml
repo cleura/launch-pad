@@ -6,7 +6,7 @@
     - name: "Create security group"
       openstack.cloud.security_group:
         state: present
-        name: "{{ stack_name }}-security_group"
+        name: "{{ pad_name }}-security_group"
       register: "_security_group"
 
     - name: "Create security group rule for internal connections (IPv4)"
@@ -70,4 +70,4 @@
     - name: "Delete security group"
       openstack.cloud.security_group:
         state: absent
-        name: "{{ stack_name }}-security_group"
+        name: "{{ pad_name }}-security_group"
