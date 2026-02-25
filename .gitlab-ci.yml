@@ -14,7 +14,24 @@ lint:
     - tox -e gitlint
     - tox -e yamllint,markdownlint
 
-test:
+test-tox:
   stage: test
   script:
     - tox
+
+test-tf:
+  stage: test
+  image:
+    name: 'ghcr.io/opentofu/opentofu:$VERSION'
+    entrypoint:
+      - ""
+  parallel:
+    matrix:
+      - VERSION:
+          - "1.11"
+          - "1.10"
+          - "1.9"
+  before_script: []
+  script:
+    - tofu -chdir=tf init
+    - tofu -chdir=tf validate
