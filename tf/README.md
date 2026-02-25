@@ -1,0 +1,72 @@
+# Cleura Cloud Launch Pad (OpenTofu)
+
+# Prerequisites
+
+You'll need the `tofu` command from [OpenTofu](https://opentofu.org) available on your system.
+
+There are multiple ways to install OpenTofu on your system.
+Please refer to the [installation instructions](https://opentofu.org/docs/intro/install/) for details.
+
+# Configuration
+
+In order to build your Launch Pad, you need an OpenTofu *configuration*.
+
+Your OpenTofu configuration is in the `.tf` files in this directory.
+Do not modify these file.
+
+# Variables
+
+The configuration supports multiple *variables*, where all but one have a reasonable *default* value.
+
+You set the variables for your Launch Pad in the file `vars.tfvars`.
+Specifically, you need to set the variable `ssh_public_key` to your public SSH key:
+
+```hcl
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL/Gftxrp74jLZJAxmM5ei6Vvq9lHv18DDWws1O9hckX john.doe@example.com"
+```
+
+Be sure to replace the value with *your* SSH public key.
+
+# Environment variables
+
+To build your Launch Pad, you need to set `OS_*` environment variables as described in the [Accessing the OpenStack API](https://docs.cleura.cloud/kna1/howto/getting-started/enable-openstack-cli/) section in Cleura Docs.
+
+# Building your Launch Pad
+
+Once you have installed the prerequisite packages, populated your `vars.tfvars` file, and set the correct `OS_*` environment variables, you can build your Launch Pad with the following command:
+
+```shell
+tofu apply -var-file="vars.tfvars"
+```
+
+Building your Launch Pad should take just a few minutes.
+
+# Accessing your Pad Ramp
+
+Once `tofu apply` has completed, you can use the `tofu state show` command to show your Pad Ramp's public ("floating") IP address:
+
+```console
+$ tofu state show openstack_networking_floatingip_v2.floating_ip 
+# openstack_networking_floatingip_v2.floating_ip:
+resource "openstack_networking_floatingip_v2" "floating_ip" {
+    address   = "192.0.2.146"
+    [...]
+}
+```
+
+You can then use the `ssh` command to test connectivity:
+
+```console
+$ ssh cleura@192.0.2.146
+[...]
+Please login as the user "ubuntu" rather than the user "cleura".
+```
+The correct login name will differ based on the base operating system image.
+You can then reconnect using the correct username:
+
+```console
+$ ssh ubuntu@192.0.2.146
+Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+[...]
+ubuntu@cleura-cloud-launch-pad-ramp:~$
+```

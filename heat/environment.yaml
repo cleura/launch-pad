@@ -1,0 +1,3 @@
+---
+parameters:
+  ssh_public_key: ""
