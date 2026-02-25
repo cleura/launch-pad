@@ -8,8 +8,8 @@
     teardown: true
 
   tasks:
-    - name: "Manage the bastion host"
-      ansible.builtin.import_tasks: "bastion-host.yaml"
+    - name: "Manage the Pad Ramp"
+      ansible.builtin.import_tasks: "ramp.yaml"
     - name: "Manage security groups"
       ansible.builtin.import_tasks: "secgroups.yaml"
     - name: "Manage network resources"

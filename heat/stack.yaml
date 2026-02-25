@@ -3,7 +3,7 @@ heat_template_version: wallaby
 
 description: >-
   Cleura Cloud Launch Pad: Creates a network, router, IPv4 and IPv6
-  subnets, a security group, and a bastion host running your preferred
+  subnets, a security group, and a Pad Ramp host running your preferred
   base OS.
 
 parameters:
@@ -54,7 +54,7 @@ parameters:
       - custom_constraint: ip_or_cidr
   image:
     type: string
-    description: "Base image to use for the bastion host"
+    description: "Base image to use for the Pad Ramp"
     default: "Ubuntu 24.04 Noble Numbat x86_64"
     constraints:
       - custom_constraint: glance.image
@@ -64,7 +64,7 @@ parameters:
           - "Rocky Linux 10 x86_64"
   volume_size:
     type: number
-    description: "Storage space allocated to the bastion host (GiB)"
+    description: "Storage space allocated to the Pad Ramp (GiB)"
     default: 10
     constraints:
       - range:
@@ -72,7 +72,7 @@ parameters:
           max: 100
   flavor:
     type: string
-    description: "Flavor to use for the bastion host"
+    description: "Flavor to use for the Pad Ramp"
     default: "b.2c2gb"
     constraints:
       - custom_constraint: nova.flavor
@@ -82,7 +82,7 @@ conditions:
 
 resources:
 
-# WaitCondition to report successful bastion host launch and
+# WaitCondition to report successful Pad Ramp launch and
 # configuration.
 #
 # The stack should always come up within 5 minutes.
@@ -233,7 +233,7 @@ resources:
 
 # Based on the image, the default username differs. By defining a user
 # "cleura" with user redirect, the user can always find the correct
-# default username for the bastion host OS.
+# default username for the Pad Ramp OS.
   user_config:
     type: "OS::Heat::CloudConfig"
     properties:
@@ -267,8 +267,8 @@ resources:
               params:
                 'curl': { get_attr: ['all_done_handle', 'curl_cli'] }
 
-# Aggregated multipart config for the bastion host
-  bastion_config:
+# Aggregated multipart config for the Pad Ramp
+  ramp_config:
     type: OS::Heat::MultipartMime
     properties:
       parts:
@@ -278,36 +278,36 @@ resources:
         - config: {get_resource: all_done_config}
 
 
-  bastion_host_port:
+  ramp_port:
     type: OS::Neutron::Port
     properties:
       name:
         list_join:
           - "-"
-          - [{ get_param: "OS::stack_name" }, "bastion", "port"]
+          - [{ get_param: "OS::stack_name" }, "ramp", "port"]
       network: { get_resource: network }
       security_groups:
         - { get_resource: security_group }
 
-  bastion_host:
+  ramp:
     type: OS::Nova::Server
     properties:
       name:
         list_join:
           - "-"
-          - [{ get_param: "OS::stack_name" }, "bastion"]
+          - [{ get_param: "OS::stack_name" }, "ramp"]
       block_device_mapping_v2:
         - image: { get_param: image }
           volume_size: { get_param: volume_size }
           delete_on_termination: true
       flavor: { get_param: flavor }
-      user_data: { get_resource: bastion_config }
+      user_data: { get_resource: ramp_config }
       user_data_format: RAW
       user_data_update_policy: IGNORE
       config_drive: true
       key_name: { get_resource: key_pair }
       networks:
-        - port: { get_resource: bastion_host_port }
+        - port: { get_resource: ramp_port }
 
 
 # We always create just one router, which uses the public_net as its
@@ -349,20 +349,20 @@ resources:
     type: OS::Neutron::FloatingIPAssociation
     properties:
       floatingip_id: { get_resource: floating_ip }
-      port_id: { get_resource: bastion_host_port }
+      port_id: { get_resource: ramp_port }
 
 
 outputs:
 
 # Individual outputs, to be fetched separately as needed
   public_ipv4:
-    description: Bastion host's public IPv4 address
+    description: Pad Ramp's public IPv4 address
     value:
       get_attr:
         - floating_ip
         - floating_ip_address
   allowed_networks_ipv4:
-    description: IPv4 networks allowed to connect to the bastion host
+    description: IPv4 networks allowed to connect to the Pad Ramp
     value:
       get_attr:
         - security_group_rule_ssh_ipv4
@@ -370,16 +370,16 @@ outputs:
         - remote_ip_prefix
   public_ipv6:
     condition: enable_ipv6
-    description: Bastion host's public IPv6 address
+    description: Pad Ramp's public IPv6 address
     value:
       get_attr:
-        - bastion_host_port
+        - ramp_port
         - fixed_ips
         - 1
         - ip_address
   allowed_networks_ipv6:
     condition: enable_ipv6
-    description: IPv6 networks allowed to connect to the bastion host
+    description: IPv6 networks allowed to connect to the Pad Ramp
     value:
       get_attr:
         - security_group_rule_ssh_ipv6
@@ -425,12 +425,12 @@ outputs:
           Pad name: pad_name
           Stack UUID: stack_uuid
 
-          Bastion host server UUID: server_uuid
+          Pad Ramp server UUID: server_uuid
 
-          Bastion host IPv4 address: server_ipv4
+          Pad Ramp IPv4 address: server_ipv4
           Allows SSH from: server_ipv4_ssh
 
-          Bastion host IPv6 address: server_ipv6
+          Pad Ramp IPv6 address: server_ipv6
           Allows SSH from: server_ipv6_ssh
 
           Network UUID: network_uuid
@@ -442,7 +442,7 @@ outputs:
         params:
           pad_name: { get_param: "OS::stack_name" }
           stack_uuid: { get_param: "OS::stack_id" }
-          server_uuid: { get_resource: bastion_host }
+          server_uuid: { get_resource: ramp }
           server_ipv4: { get_attr: [ floating_ip, floating_ip_address ] }
           server_ipv4_ssh:
             get_attr:
@@ -452,7 +452,7 @@ outputs:
           server_ipv6:
             if:
               - enable_ipv6
-              - { get_attr: [ bastion_host_port, fixed_ips, 1, ip_address ] }
+              - { get_attr: [ ramp_port, fixed_ips, 1, ip_address ] }
               - "None"
           server_ipv6_ssh:
             if:

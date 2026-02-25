@@ -1,28 +1,28 @@
 ---
-- name: "Create a bastion host"
+- name: "Create a Pad Ramp"
   when: "not(teardown | bool)"
   block:
 
     - name: "Create port"
       openstack.cloud.port:
         state: present
-        name: "{{ pad_name }}-bastion-port"
+        name: "{{ pad_name }}-ramp-port"
         network: "{{ _network.network.id }}"
         security_groups:
           - "{{ _security_group.security_group.id }}"
-      register: "_bastion_port"
+      register: "_ramp_port"
 
     - name: "Create server"
       openstack.cloud.server:
         state: present
-        name: "{{ pad_name }}-bastion"
+        name: "{{ pad_name }}-ramp"
         boot_from_volume: true
         config_drive: true
         flavor: "{{ flavor }}"
         image: "{{ image }}"
         key_name: "{{ _keypair.keypair.id }}"
         nics:
-          - port-id: "{{ _bastion_port.port.id }}"
+          - port-id: "{{ _ramp_port.port.id }}"
         volume_size: "{{ volume_size }}"
         userdata: |
           #cloud-config
@@ -33,25 +33,25 @@
             - default
             - name: cleura
               ssh_redirect_user: true
-      register: "_bastion_host"
+      register: "_ramp"
 
     - name: "Assign a floating IP address"
       openstack.cloud.floating_ip:
         state: present
         network: "{{ public_net }}"
-        server: "{{ _bastion_host.server.id }}"
-      register: "_bastion_floating_ip"
+        server: "{{ _ramp.server.id }}"
+      register: "_ramp_floating_ip"
 
-- name: "Remove the bastion host"
+- name: "Remove the Pad Ramp"
   when: "teardown | bool"
   block:
 
     - name: "Delete server"
       openstack.cloud.server:
         state: absent
-        name: "{{ pad_name }}-bastion"
+        name: "{{ pad_name }}-ramp"
 
     - name: "Delete port"
       openstack.cloud.port:
         state: absent
-        name: "{{ pad_name }}-bastion-port"
+        name: "{{ pad_name }}-ramp-port"

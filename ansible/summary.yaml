@@ -30,12 +30,12 @@
 
           Pad name: {{ pad_name }}
 
-          Bastion host server UUID: {{ _bastion_host.server.id }}
+          Pad Ramp server UUID: {{ _ramp.server.id }}
 
-          Bastion host IPv4 address: {{ _bastion_floating_ip.floating_ip.floating_ip_address }}
+          Pad Ramp IPv4 address: {{ _ramp_floating_ip.floating_ip.floating_ip_address }}
           Allows SSH from: {{ _security_group_rule_ssh_ipv4.rule.remote_ip_prefix }}
 
-          {% if enable_ipv6 | bool %}Bastion host IPv6 address: {{ _bastion_port.port.fixed_ips[1].ip_address }}
+          {% if enable_ipv6 | bool %}Pad Ramp IPv6 address: {{ _ramp_port.port.fixed_ips[1].ip_address }}
           Allows SSH from: {{ _security_group_rule_ssh_ipv6.rule.remote_ip_prefix }}{% endif %}
 
           Network UUID: {{ _network.network.id }}
@@ -43,7 +43,7 @@
 
           To find out how to connect to your host, run this command:
 
-          openstack server ssh {{ _bastion_host.server.id }} -- -l cleura
+          openstack server ssh {{ _ramp.server.id }} -- -l cleura
 
     - name: "Show summary"
       ansible.builtin.debug:

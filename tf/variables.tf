@@ -44,16 +44,16 @@ variable "ipv6_allow_access" {
 }
 variable "image" {
   type = string
-  description = "Base image to use for the bastion host"
+  description = "Base image to use for the Pad Ramp"
   default = "Ubuntu 24.04 Noble Numbat x86_64"
 }
 variable "volume_size" {
   type = number
-  description = "Storage space allocated to the bastion host (GiB)"
+  description = "Storage space allocated to the Pad Ramp (GiB)"
   default = 10
 }
 variable "flavor" {
   type = string
-  description = "Flavor to use for the bastion host"
+  description = "Flavor to use for the Pad Ramp"
   default = "b.2c2gb"
 }

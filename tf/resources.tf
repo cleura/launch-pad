@@ -83,15 +83,15 @@ resource "openstack_networking_secgroup_rule_v2" "security_group_rule_ssh_ipv6" 
   remote_ip_prefix = var.ipv6_allow_access
 }
 
-resource "openstack_networking_port_v2" "bastion_host_port" {
-  name = "${var.pad_name}-bastion-port"
+resource "openstack_networking_port_v2" "ramp_port" {
+  name = "${var.pad_name}-ramp-port"
   network_id = openstack_networking_network_v2.network.id
   admin_state_up = "true"
   security_group_ids = [openstack_networking_secgroup_v2.security_group.id]
 }
 
-resource "openstack_compute_instance_v2" "bastion_host" {
-  name = "${var.pad_name}-bastion-host"
+resource "openstack_compute_instance_v2" "ramp" {
+  name = "${var.pad_name}-ramp"
   flavor_name = var.flavor
   config_drive = true
 
@@ -108,7 +108,7 @@ resource "openstack_compute_instance_v2" "bastion_host" {
   key_pair = openstack_compute_keypair_v2.keypair.name
 
   network {
-    port = openstack_networking_port_v2.bastion_host_port.id
+    port = openstack_networking_port_v2.ramp_port.id
   }
 }
 
@@ -118,7 +118,7 @@ resource "openstack_networking_floatingip_v2" "floating_ip" {
 
 resource "openstack_networking_floatingip_associate_v2" "floating_ip_association" {
   floating_ip = openstack_networking_floatingip_v2.floating_ip.address
-  port_id     = openstack_networking_port_v2.bastion_host_port.id
+  port_id     = openstack_networking_port_v2.ramp_port.id
   depends_on  = [openstack_networking_router_interface_v2.router_interface_ipv4]
 }
 
