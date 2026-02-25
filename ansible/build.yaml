@@ -7,6 +7,9 @@
   vars:
     teardown: false
 
+  vars_files:
+    - vars.yaml
+
   tasks:
     - name: "Manage key pair"
       ansible.builtin.import_tasks: "keypair.yaml"

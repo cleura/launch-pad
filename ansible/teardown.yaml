@@ -7,6 +7,9 @@
   vars:
     teardown: true
 
+  vars_files:
+    - vars.yaml
+
   tasks:
     - name: "Manage the Pad Ramp"
       ansible.builtin.import_tasks: "ramp.yaml"
