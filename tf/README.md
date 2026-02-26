@@ -31,9 +31,21 @@ Be sure to replace the value with *your* SSH public key.
 
 To build your Launch Pad, you need to set `OS_*` environment variables as described in the [Accessing the OpenStack API](https://docs.cleura.cloud/kna1/howto/getting-started/enable-openstack-cli/) section in Cleura Docs.
 
+# Initialising the provider
+
+The OpenTofu configuration relies on the [`openstack`](https://search.opentofu.org/provider/terraform-provider-openstack/openstack/) provider, which you must initialise before applying the configuration for the first time.
+
+You do this with the following command:
+
+```shell
+tofu init
+```
+
+Provider initialisation should take no more than a few seconds.
+
 # Building your Launch Pad
 
-Once you have installed the prerequisite packages, populated your `vars.tfvars` file, and set the correct `OS_*` environment variables, you can build your Launch Pad with the following command:
+Once you have installed the prerequisite packages, populated your `vars.tfvars` file, set the correct `OS_*` environment variables, and initialised the provider, you can build your Launch Pad with the following command:
 
 ```shell
 tofu apply -var-file="vars.tfvars"
