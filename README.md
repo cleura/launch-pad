@@ -20,7 +20,7 @@ Building a Launch Pad results in the creation of these resources:
 To check out the Launch Pad repository, run this command:
 
 ```shell
-git clone https://github.org/cleura/launch-pad
+git clone https://github.com/cleura/launch-pad
 ```
 
 For specifics building a Launch Pad using the orchestration platform of your choice, see the additional notes on [Heat](heat.md), [Ansible](ansible.md), and [OpenTofu](tf.md).
