@@ -7,10 +7,10 @@ If they are not already installed on your system, you can use `pip` to install t
 
 In the `heat` subdirectory of your checkout, run the following commands:
 
-```console
-$ python -m venv launch-pad
-$ source launch-pad/bin/activate
-$ pip install -r requirements.txt
+```shell
+python -m venv launch-pad
+source launch-pad/bin/activate
+pip install -r requirements.txt
 ```
 ## Stack template
 
