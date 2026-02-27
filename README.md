@@ -2,13 +2,19 @@
 
 The [Cleura Cloud Launch Pad](https://github.com/cleura/launch-pad) repository contains a set of essential orchestration configurations you can use to bootstrap a virtual environment on Cleura Cloud.
 
+## Supported frameworks
+
 We support these orchestration frameworks:
 
 * [OpenStack Heat](https://docs.openstack.org/heat/)
 * [Ansible](https://docs.ansible.com/) (with the [`openstack.cloud`](https://docs.ansible.com/projects/ansible/latest/collections/openstack/cloud/) collection)
 * [OpenTofu](https://opentofu.org/docs/) (with the [`openstack`](https://search.opentofu.org/provider/terraform-provider-openstack/openstack/) provider)
 
+## Prerequisites
+
 Building a Launch Pad requires a [Cleura Cloud account](https://docs.cleura.cloud/kna1/howto/getting-started/create-account/), and a valid [set of OpenStack API credentials](https://docs.cleura.cloud/kna1/howto/getting-started/enable-openstack-cli/).
+
+## What's in a Launch Pad?
 
 Building a Launch Pad results in the creation of these resources:
 
@@ -23,6 +29,11 @@ To check out the Launch Pad repository, run this command:
 git clone https://github.com/cleura/launch-pad
 ```
 
+## Building your Launch Pad
+
 For specifics building a Launch Pad using the orchestration platform of your choice, see the additional notes on [Heat](heat.md), [Ansible](ansible.md), and [OpenTofu](tf.md).
+
+
+## Where to go from here
 
 Once you have built your Launch Pad, you can [launch further resources from it](https://docs.cleura.cloud/kna1/howto/getting-started/launching-resources/).
