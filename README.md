@@ -17,7 +17,7 @@ Building a Launch Pad results in the creation of these resources:
 * Your Pad Ramp, which is a jump host pre-installed with Ubuntu, Debian, or Rocky Linux that you can connect with by Secure Shell.
   You can optionally restrict Secure Shell access to this host to a source IP address or network.
 
-For specifics building a Launch Pad using the orchestration platform of your choice, see the additional notes on [Heat](heat/README.md), [Ansible](ansible/README.md), and [OpenTofu](tf/README.md).
+For specifics building a Launch Pad using the orchestration platform of your choice, see the additional notes on [Heat](heat.md), [Ansible](ansible.md), and [OpenTofu](tf.md).
 
 Once you have built your Launch Pad, you can launch further resources from it.
 For more details, see [Cleura Docs](https://docs.cleura.cloud).
