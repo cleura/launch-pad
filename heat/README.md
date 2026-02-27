@@ -5,7 +5,7 @@
 You'll need the `python-openstackclient`, `python-neutronclient`, and `python-heatclient` packages.
 If they are not already installed on your system, you can use `pip` to install them into a Python virtual environment (venv).
 
-While in this directory (`heat`), run the following commands:
+In the `heat` subdirectory of your checkout, run the following commands:
 
 ```console
 $ python -m venv launch-pad

@@ -11,8 +11,8 @@ Please refer to the [installation instructions](https://opentofu.org/docs/intro/
 
 In order to build your Launch Pad, you need an OpenTofu *configuration*.
 
-Your OpenTofu configuration is in the `.tf` files in this directory.
-Do not modify these file.
+Your OpenTofu configuration is in the `.tf` files contained in the `tf` subdirectory of your checkout.
+Do not modify these files.
 
 ## Variables
 

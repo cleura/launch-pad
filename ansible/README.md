@@ -5,7 +5,7 @@
 You'll need the `ansible-core` and `openstacksdk` packages, and the `openstack.cloud` Ansible collection.
 If they are not already installed on your system, you can use `pip` to install them into a Python virtual environment (venv).
 
-While in this directory (`ansible`), run the following commands:
+In the `ansible` subdirectory of your checkout, run the following commands:
 
 ```console
 $ python -m venv launch-pad
