@@ -1,20 +1,20 @@
 # Cleura Cloud Launch Pad (OpenTofu)
 
-# Prerequisites
+## Prerequisites
 
 You'll need the `tofu` command from [OpenTofu](https://opentofu.org) available on your system.
 
 There are multiple ways to install OpenTofu on your system.
 Please refer to the [installation instructions](https://opentofu.org/docs/intro/install/) for details.
 
-# Configuration
+## Configuration
 
 In order to build your Launch Pad, you need an OpenTofu *configuration*.
 
 Your OpenTofu configuration is in the `.tf` files in this directory.
 Do not modify these file.
 
-# Variables
+## Variables
 
 The configuration supports multiple *variables*, where all but one have a reasonable *default* value.
 
@@ -27,11 +27,11 @@ ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL/Gftxrp74jLZJAxmM5ei6Vvq
 
 Be sure to replace the value with *your* SSH public key.
 
-# Environment variables
+## Environment variables
 
 To build your Launch Pad, you need to set `OS_*` environment variables as described in the [Accessing the OpenStack API](https://docs.cleura.cloud/kna1/howto/getting-started/enable-openstack-cli/) section in Cleura Docs.
 
-# Initialising the provider
+## Initialising the provider
 
 The OpenTofu configuration relies on the [`openstack`](https://search.opentofu.org/provider/terraform-provider-openstack/openstack/) provider, which you must initialise before applying the configuration for the first time.
 
@@ -43,7 +43,7 @@ tofu init
 
 Provider initialisation should take no more than a few seconds.
 
-# Building your Launch Pad
+## Building your Launch Pad
 
 Once you have installed the prerequisite packages, populated your `vars.tfvars` file, set the correct `OS_*` environment variables, and initialised the provider, you can build your Launch Pad with the following command:
 
@@ -53,7 +53,7 @@ tofu apply -var-file="vars.tfvars"
 
 Building your Launch Pad should take just a few minutes.
 
-# Accessing your Pad Ramp
+## Accessing your Pad Ramp
 
 Once `tofu apply` has completed, you can use the `tofu state show` command to show your Pad Ramp's public ("floating") IP address:
 

@@ -1,6 +1,6 @@
 # Cleura Cloud Launch Pad (OpenStack Heat)
 
-# Prerequisites
+## Prerequisites
 
 You'll need the `python-openstackclient`, `python-neutronclient`, and `python-heatclient` packages.
 If they are not already installed on your system, you can use `pip` to install them into a Python virtual environment (venv).
@@ -12,14 +12,14 @@ $ python -m venv launch-pad
 $ source launch-pad/bin/activate
 $ pip install -r requirements.txt
 ```
-# Stack template
+## Stack template
 
 In order to launch an OpenStack Heat *stack*, you need a *template*.
 
 The template for your Launch Pad is in the file `template.yaml`.
 Do not modify this file.
 
-# Parameters
+## Parameters
 
 The template supports multiple *parameters*, where all but one have a reasonable *default* value.
 
@@ -34,11 +34,11 @@ parameters:
 
 Be sure to replace the value with *your* SSH public key.
 
-# Environment variables
+## Environment variables
 
 To build your Launch Pad, you need to set `OS_*` environment variables as described in the [Accessing the OpenStack API](https://docs.cleura.cloud/kna1/howto/getting-started/enable-openstack-cli/) section in Cleura Docs.
 
-# Building your Launch Pad
+## Building your Launch Pad
 
 Once you have installed the prerequisite packages, populated your `environment.yaml` file, and set the correct `OS_*` environment variables, you can build your Launch Pad with the following command:
 
@@ -48,7 +48,7 @@ openstack stack create --wait -t template.yaml -e environment.yaml cleura-cloud-
 
 Building your Launch Pad should take just a few minutes.
 
-# Accessing your Pad Ramp
+## Accessing your Pad Ramp
 
 Once the Launch Pad has spun up, you can retrieve its details with the following command:
 ```shell
