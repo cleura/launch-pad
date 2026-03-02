@@ -70,3 +70,15 @@ Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-101-generic x86_64)
 [...]
 ubuntu@cleura-cloud-launch-pad-ramp:~$
 ```
+
+## Tearing down a Launch Pad
+
+In the event that you built a Launch Pad for testing purposes only, **and you have not launched any other cloud resources in your environment,** you might want to tear it down.
+To do so, issue the following command:
+
+```console
+$ ansible-playbook teardown.yaml
+[...]
+PLAY RECAP *******************************************************************************************************
+localhost                  : ok=8    changed=8    unreachable=0    failed=0    skipped=15   rescued=0    ignored=0
+```

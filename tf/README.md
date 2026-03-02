@@ -58,7 +58,7 @@ Building your Launch Pad should take just a few minutes.
 Once `tofu apply` has completed, you can use the `tofu state show` command to show your Pad Ramp's public ("floating") IP address:
 
 ```console
-$ tofu state show openstack_networking_floatingip_v2.floating_ip 
+$ tofu state show openstack_networking_floatingip_v2.floating_ip
 # openstack_networking_floatingip_v2.floating_ip:
 resource "openstack_networking_floatingip_v2" "floating_ip" {
     address   = "192.0.2.146"
@@ -81,4 +81,28 @@ $ ssh ubuntu@192.0.2.146
 Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-101-generic x86_64)
 [...]
 ubuntu@cleura-cloud-launch-pad-ramp:~$
+```
+
+## Tearing down a Launch Pad
+
+In the event that you built a Launch Pad for testing purposes only, **and you have not launched any other cloud resources in your environment,** you might want to tear it down.
+To do so, issue the following command:
+
+```console
+$ tofu destroy -var-file="vars.tfvars"
+[...]
+Plan: 0 to add, 0 to change, 16 to destroy.
+
+Do you really want to destroy all resources?
+  OpenTofu will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  Enter a value: yes
+```
+
+At the prompt, type `yes` followed by the `Enter` key.
+After a minute or so, you will see the following message:
+
+```plain
+Destroy complete! Resources: 16 destroyed.
 ```

@@ -72,3 +72,16 @@ Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-101-generic x86_64)
 [...]
 ubuntu@cleura-cloud-launch-pad-bastion:~$
 ```
+
+## Tearing down a Launch Pad
+
+In the event that you built a Launch Pad for testing purposes only, **and you have not launched any other cloud resources in your environment,** you might want to tear it down.
+To do so, issue the following command:
+
+```console
+$ openstack stack delete cleura-cloud-launch-pad
+
+Are you sure you want to delete this stack(s) [y/N]? y
+```
+
+At the prompt, type `y` followed by the `Enter` key.
