@@ -14,10 +14,17 @@ lint:
     - tox -e gitlint
     - tox -e yamllint,markdownlint
 
-test-tox:
+test-ansible:
   stage: test
   script:
-    - tox
+    - "tox -e ansible${VERSION}-lint"
+  parallel:
+    matrix:
+      - VERSION:
+          - "2.20"
+          - "2.19"
+          - "2.18"
+          - "2.16"
 
 test-tf:
   stage: test
