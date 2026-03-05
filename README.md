@@ -33,6 +33,36 @@ git clone https://github.com/cleura/launch-pad
 
 For specifics building a Launch Pad using the orchestration platform of your choice, see the additional notes on [Heat](heat.md), [Ansible](ansible.md), and [OpenTofu](tf.md).
 
+### Configuration options
+
+You can tweak a Launch Pad's configuration by setting options.
+Depending on your selected configuration framework, these options are either *parameters* (OpenStack Heat) or *variables* (Ansible, OpenTofu).
+
+Every Launch Pad requires that you specify one option:
+
+| Parameter        | Type   | Purpose                             |
+|------------------|--------|-------------------------------------|
+| `ssh_public_key` | String | Your Secure Shell (SSH) public key. |
+
+All others come with reasonable defaults:
+
+| Parameter           | Type    | Purpose                                                                                                       | Default                            |
+|---------------------|---------|---------------------------------------------------------------------------------------------------------------|------------------------------------|
+| `enable_ipv6`       | Boolean | Whether to enable IPv6 in your Launch Pad.                                                                    | `true`                             |
+| `image`             | String  | The base operating system image to use for your Pad Ramp.                                                     | `Ubuntu 24.04 Noble Numbat x86_64` |
+| `ipv4_allow_access` | String  | An IPv4 address or network from which to allow SSH access to your Pad Ramp.                                   | `0.0.0.0/0` (allow from anywhere)  |
+| `ipv4_subnet_cidr`  | String  | The network address for your new private network, in CIDR notation. This can be any RFC 1918 private network. | `192.168.101.0/24`                 |
+| `ipv6_allow_access` | String  | An IPv6 address or network from which to allow SSH access to your Pad Ramp.                                   | `::/0` (allow from anywhere)       |
+
+Additional options are available, but you should normally set them only if advised by Cleura's Service Center:
+
+| Parameter         | Type    | Purpose                                                                         | Default            |
+|-------------------|---------|---------------------------------------------------------------------------------|--------------------|
+| `flavor`          | String  | Your Pad Ramp's instance flavor (a measure of its CPU core and RAM allocation). | `b.2c2gb`          |
+| `ipv6_mode`       | String  | The IPv6 address assignment and router advertisement mode for your network.     | `slaac`            |
+| `ipv6_subnetpool` | String  | The IPv6 subnetpool from which your IPv6 subnet is created.                     | `ipv6_tenant_pool` |
+| `public_net`      | String  | The network name from which your Pad Ramp gets a public IPv4 address.           | `ext-net`          |
+| `volume_size`     | Integer | The size of your Pad Ramp's boot device (in GiB).                               | 10                 |
 
 ## Where to go from here
 
