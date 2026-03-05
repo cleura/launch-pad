@@ -1,6 +1,6 @@
 ---
 jobs:
-  test-tox:
+  lint:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out code"
@@ -19,29 +19,7 @@ jobs:
       - name: "Test with tox"
         run: |
           tox -e gitlint
-          tox
-
-  test-tf:
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: "Check out code"
-        uses: "actions/checkout@v6"
-      - name: "Set up OpenTofu"
-        uses: "opentofu/setup-opentofu@v1"
-        with:
-          tofu_version: "${{ matrix.tofu_version }}"
-      - name: "Test configuration"
-        run: |
-          tofu version
-          tofu -chdir=tf init
-          tofu -chdir=tf validate
-    strategy:
-      fail-fast: true
-      matrix:
-        tofu_version:
-          - "1.11"
-          - "1.10"
-          - "1.9"
+          tox -e yamllint,markdownlint
 
 name: build
 

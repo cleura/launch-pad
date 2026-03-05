@@ -1,0 +1,57 @@
+---
+jobs:
+  test-ansible:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out code"
+        uses: "actions/checkout@v6"
+        with:
+          # Checkout a pull request's HEAD commit instead of the merge
+          # commit, so that gitlint lints the correct commit message.
+          ref: "${{ github.event.pull_request.head.sha }}"
+      - name: "Set up Python 3.13"
+        uses: "actions/setup-python@v6"
+        with:
+          python-version: "3.13"
+      - name: "Install Python dependencies"
+        run: |
+          pip install tox
+      - name: "Test with tox"
+        run: |
+          tox -e ansible${{ matrix.ansible_version }}-lint
+    strategy:
+      fail-fast: true
+      matrix:
+        ansible_version:
+          - "2.20"
+          - "2.19"
+          - "2.18"
+          - "2.16"
+
+  test-tf:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out code"
+        uses: "actions/checkout@v6"
+      - name: "Set up OpenTofu"
+        uses: "opentofu/setup-opentofu@v1"
+        with:
+          tofu_version: "${{ matrix.tofu_version }}"
+      - name: "Test configuration"
+        run: |
+          tofu version
+          tofu -chdir=tf init
+          tofu -chdir=tf validate
+    strategy:
+      fail-fast: true
+      matrix:
+        tofu_version:
+          - "1.11"
+          - "1.10"
+          - "1.9"
+
+name: test
+
+'on':
+  pull_request: {}
+  push: {}
