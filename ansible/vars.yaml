@@ -1,2 +1,3 @@
 ---
-ssh_public_key: ""
+# Uncomment and replace null with your SSH public key
+# ssh_public_key: null
