@@ -13,8 +13,8 @@
 
 ## Supported versions
 
-* The OpenStack stack template supports the OpenStack Caracal, Epoxy, and Flamingo client libraries.
-* The Ansible playbooks support Ansible Core 2.16, 2.19, and 2.20, and the OpenStack Caracal, Epoxy, and Flamingo client SDKs.
+* The OpenStack stack template supports the OpenStack Caracal, Epoxy, Flamingo, and Gazpacho client libraries.
+* The Ansible playbooks support Ansible Core 2.16, 2.19, and 2.20, and the OpenStack Caracal, Epoxy, Flamingo, and Gazpacho client SDKs.
 * The OpenTofu configuration supports OpenTofu 1.9, 1.10, and 1.11.
 
 ## Style Guide
