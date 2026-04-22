@@ -44,3 +44,18 @@ To enable, run this command:
 ```shell
 git config core.hooksPath .githooks
 ```
+
+## AI Assistance
+
+You may use AI assistance for modifications to this repo.
+However, you retain full responsibility for your contribution.
+
+You must declare AI assistance (identifying both the tool and the model you used) in your commit message in an `Assisted-by:` line, as in the following example:
+
+```patch
+feat: Add superfrobnication
+
+Add superfrobnication support to all Launch Pads.
+
+Assisted-by: coding-assistant/blerg3.6-coder
+```
