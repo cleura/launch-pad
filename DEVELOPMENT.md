@@ -32,9 +32,13 @@ This repo has both a GitLab CI pipeline definition (`.gitlab-ci.yml`) and GitHub
 
 The tests are substantially identical, and use parallel-build matrix strategies to cover the supported platforms.
 
+## Commit Messages
+
+Commit messages must follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/#specification).
+
 ## Git Hooks
 
-`pre-commit`, `post-commit`, and `pre-push` hooks are available in `.githooks`.
+`commit-msg`, `pre-commit`, `post-commit`, and `pre-push` hooks are available in `.githooks`.
 To enable, run this command:
 
 ```shell
