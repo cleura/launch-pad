@@ -59,3 +59,7 @@ Add superfrobnication support to all Launch Pads.
 
 Assisted-by: coding-assistant/blerg3.6-coder
 ```
+
+You must configure your tool to read, parse and follow the instructions in [AGENTS.md](`AGENTS.md`).
+Most agentic coding assistants do this by default.
+If yours does not, create appropriate symlinks (like `CLAUDE.md`).
